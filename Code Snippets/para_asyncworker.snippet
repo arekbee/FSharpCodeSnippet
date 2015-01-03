@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>para_asyncworker</Title>
+			<Shortcut>para_asyncworker</Shortcut>
+			<Description>Code snippet for Async Worker </Description>
+			<Author>Arkadiusz Beer</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Code Language="fsharp"><![CDATA[type SynchronizationContext with	
+	// Extension method
+    member this.RaiseEvent (event: Event<_>) args =
+        this.Post((fun _ -> event.Trigger args), state=null)
+        
+    static member CaptureCurrent () =
+        match SynchronizationContext.Current with
+            | null -> new SynchronizationContext()
+            | ctxt -> ctxt
+	
+type AsyncWorker<'T> (jobs : seq<Async<'T>> ) = 
+    
+    // #region Events
+    let jobCompleted  = new Event<int * 'T>()
+    let error = new Event<System.Exception>()
+    let allCompleted  = new Event<'T[]>()    
+    let canceled      = new Event<System.OperationCanceledException>()
+    let cancellationCapability = new CancellationTokenSource()
+
+    // #endregion
+
+
+    // #region Member in async worker
+    
+    member this.Start () = 
+        let syncContex = SynchronizationContext.CaptureCurrent()
+
+        let jobs = jobs |> Seq.mapi (fun i job -> (job,i+1)) 
+        let work = Async.Parallel [for (job, jobNumber) in jobs ->
+                async {
+                        let! result = job
+                        syncContex.RaiseEvent jobCompleted  (jobNumber,result)
+                        return result
+                }]
+
+        Async.StartWithContinuations(work, 
+            (fun res -> syncContex.RaiseEvent allCompleted res),
+            (fun err -> syncContex.RaiseEvent error err), 
+            (fun can -> syncContex.RaiseEvent canceled can ),
+            cancellationCapability.Token
+        )
+
+     member x.CancelAsync() =
+       cancellationCapability.Cancel()
+
+    [<CLIEvent>]member this.JobCompleted  = jobCompleted.Publish
+    [<CLIEvent>]member this.AllCompleted  = allCompleted.Publish
+    [<CLIEvent>]member this.Canceled   = canceled.Publish
+    [<CLIEvent>]member this.Error      = error.Publish 
+    
+    // #endregion 
+$selected$$end$]]></Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>

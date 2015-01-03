@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>para_async</Title>
+			<Shortcut>para_async</Shortcut>
+			<Description>Code snippet for parallel async pattern </Description>
+			<Author>Arkadiusz Beer</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Declarations>
+				<Literal>
+					<ID>letName</ID>
+					<ToolTip>name of value to run in parallel mode</ToolTip>
+					<Default>asParallelAsync</Default>
+				</Literal>
+				<Literal>
+					<ID>collection</ID>
+					<ToolTip>name of colection</ToolTip>
+					<Default>collection</Default>
+				</Literal>
+			</Declarations>
+			<Code Language="fsharp"><![CDATA[let $letName$  $collection$ = 
+	Async.Parallel [ for item in $collection$ -> async { return $selected$$end$ item} ]
+		|> Async.RunSynchronously
+]]></Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
