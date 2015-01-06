@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>test_method_approval</Title>
+      <Shortcut>test_method_approval</Shortcut>
+      <Description>Code snippet for approval test method</Description>
+      <Author>Arkadiusz Beer</Author>
+      <SnippetTypes>
+        <SnippetType>Expansion</SnippetType>
+      </SnippetTypes>
+    </Header>
+    <Snippet>
+      <Declarations>
+        <Literal>
+          <ID>param1</ID>
+          <ToolTip>method name</ToolTip>
+          <Default>ApprovalTestForSubjectUnderTest</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="fsharp"><![CDATA[[<Test>]
+[<UseReporter(typeof<DiffReporter>,typeof<FileLauncherReporter>, typeof<ClipboardReporter>, typeof<FrameworkAssertReporter>)>]
+member x.$param1$() = 
+    let sb = new StringBuilder()
+    $end$
+    Approvals.Verify (sb.ToString()) ]]></Code>
+    </Snippet>
+  </CodeSnippet>
+</CodeSnippets>
